@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <title>js</title>
+</head>
+<body>
+    Hello <span class="world"></span>!
+    <script type="module">
+        // static import
+        // import {getNow} from "./js/module/module.js";
+
+        // dynamic import
+        (async () => {
+            let {getNow} = await import("./js/module/module.js");
+            // default import
+            let getFooFunction = (await import("./js/module/module.js")).default;
+            console.log("Текущее время: " + getNow());
+            console.log(getFooFunction());
+            console.log(import.meta);
+        })();
+    </script>
+</body>
+</html>
