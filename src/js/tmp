@@ -1,0 +1,102 @@
+function findClosedParentheses(string, startPosition) {
+    // startPosition is position of "("
+    let level = 0;
+    for (let i = startPosition; i < string.length; i++) {
+        if (string[i] === "(") level++;
+        if (string[i] === ")") level--;
+        if (level === 0) return i;
+    }
+}
+
+function checkOperation(string, operation) {
+    let i = 0;
+    do {
+        if (string.search(/^\(?[+-]?\d+\)?$/g) >= 0) {
+            return string.replace(/[\(\)]/g, "");
+        }
+        if (string[i] === operation) {
+            if (["-", "+"].includes(operation) && ((i === 0) || ((i === 1) && (string[0] === "(")))) {
+                i++;
+                continue;
+            }
+            // const a = string.substring(0, i).match(/[-+]?(\d+\.)?\d+$/g)[0];
+            const a = string.substring(0, i).match(/^[-+]?(\d+\.)?\d+$|(?<=^\()[+-]?\d+(\.\d+)?(?=\))/g)[0];
+            // const b = string.substring(i + 1).match(/^\d+(\.\d+)?/g)[0];
+            const b = string.substring(i + 1).match(/^\d+(\.\d+)?|(?<=^\()[+-]?\d+(\.\d+)?(?=\))/g)[0];
+            let result;
+            switch (string[i]) {
+                case "*":
+                    result = (+a) * (+b);
+                    break;
+                case "/":
+                    result = (+a) / (+b);
+                    break;
+                case "+":
+                    result = (+a) + (+b);
+                    break;
+                case "-":
+                    result = (+a) - (+b);
+                    break;
+            }
+            if (result < 0) result = `(${result})`;
+            result += "";
+            const delta = +b < 0 ? 2 : 0;
+            string = ((i - a.length >= 0) ? string.substring(0, i - a.length) : "") +
+                result +
+                ((i + 1 + b.length + delta <= string.length - 1) ? string.substring(i + 1 + b.length + delta) : "");
+            i = 0;
+        } else i++;
+    } while (i <= string.length)
+    return string;
+}
+
+function evaluate(string) {
+    string = string.replace(/\s/g, "");
+
+    let i = 0;
+    do {
+        if (string[i] === "(") {
+            let closedParentheses = findClosedParentheses(string, i);
+
+            // if (+...)
+            if (string[i + 1] === "+") {
+                string = string.substring(0, i + 1) + string.substring(i + 2);
+                closedParentheses--;
+            }
+
+            let resultParentheses = evaluate(string.substring(i + 1, closedParentheses));
+            if (resultParentheses[0] === "-") {
+                // if (-...)
+                if (resultParentheses === string.substring(i + 1, closedParentheses)) {
+                    // if without binary operation
+                    i = i + resultParentheses.length + 2;
+                } else {
+                    string = string.substring(0, i)
+                        + "(" + resultParentheses + ")" +
+                        (closedParentheses >= string.length - 1 ? "" : string.substring(closedParentheses + 1));
+                }
+            } else {
+                string = string.substring(0, i) +
+                    resultParentheses +
+                    (closedParentheses >= string.length - 1 ? "" : string.substring(closedParentheses + 1));
+                i = 0;
+            }
+        } else i++;
+    } while (i <= string.length)
+
+    // string without parentheses
+    string = checkOperation(string, "*");
+    string = checkOperation(string, "/");
+    string = checkOperation(string, "+");
+    string = checkOperation(string, "-");
+
+    return string;
+}
+
+// let string = "1+(21+35) + (1 + 2)";
+// let string = "10+(-1)";
+//  let string = "1-(+2)";
+let string = "2 - 3 - 4";
+console.log(`${string} = ${evaluate(string)}`);
+// string = "11+2";
+// console.log(`${string} = ${evaluate(string)}`);

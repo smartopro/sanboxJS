@@ -1,0 +1,9 @@
+{
+    "hi": "Hello world",
+    "description": "Description header",
+    "object": {
+        "objField1": "objValue1",
+        "objField2": "objValue2"
+    },
+    "array": ["1", "2", "3", "4"]
+}
